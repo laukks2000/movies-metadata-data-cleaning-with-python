@@ -17,7 +17,7 @@ df1 = df[["director_name",
           "title_year",
           "imdb_score"]]
 print(df1)
-
+#############################################################################################
 # To project the percentage of missing values
 total_count = df1.count()
 missing_count = df1.isnull().sum()
@@ -27,3 +27,12 @@ missing_value_df1 = pd.DataFrame({'Total Count': total-count,
                                   'Percentage': missing_percent})
 missing_value_df1.sort_values('Percentage', inplace=True)
 print(missing_value_df1)
+#############################################################################################
+# Removing missing values from variables that cannot be imputed
+df1 = df1.dropna(subset=['actor_1_name',
+                         'actor_1_facebook_likes',
+                         'director_name',
+                         'director_facebook_likes',
+                         'title_year'])
+df1.count()
+#############################################################################################
