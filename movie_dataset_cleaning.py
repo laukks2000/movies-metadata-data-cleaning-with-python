@@ -36,3 +36,36 @@ df1 = df1.dropna(subset=['actor_1_name',
                          'title_year'])
 df1.count()
 #############################################################################################
+# Using Multivariate Imputation by Chained Equations (MICE) to impute missing values
+# MICE is used as the missing values are MAR (missing at random)
+# Importing the imputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+from sklearn import linear_model
+
+df_mice = df1.filter(['imdb_score', 'duration', 'gross', 'budget'], axis=1).copy()
+
+# Defining the MICE imputer and filling in the missing values
+mice_imputer = IterativeImputer(estimator=linear_model.BayesianRidge(),
+                                n_nearest_features=None,
+                                imputation_order='random')
+df_mice_imputed = pd.DataFrame(mice_imputer.fit_transform(df_mice),
+                               columns=df.mice.columns)
+
+df_mice_imputed['duration'] = df_mice_imputed['duration'].round()
+df_mice_imputed['gross'] = df_mice_imputed['gross'].round()
+df_mice_imputed['budget'] = df_mice_imputed['budget'].round()
+
+df1 = df1.drop(['imdb_score', 'duration', 'gross', 'budget'], axix=1)
+df1 = pd.concat([df1, df_mice_imputed], axis=1)
+df1 = df1.dropna()
+##############################################################################################
+# Splitting the genres and combining with the main dataset
+df2 = df1.genres.str.split('|', expand=True).add_prefix('genres_')
+df3 = pd.concat([df1, df2], axis=1)
+
+# Dropping redundant variables
+df3 = df3.drop(['genres'], axis=1)
+
+# Output the dataframe into a .csv file
+df3.to_csv('movie_metadata_subset_cleaned.csv', index=False)
